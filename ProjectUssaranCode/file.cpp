@@ -188,7 +188,7 @@ void List<T>::pred(Node<T>*& p) {
 // list
 template<typename T>
 List<T>::List() {
-  pHead = new Node<T>{}; // Nó cabeça
+  pHead = new Node<T>{};
   pHead->next = nullptr;
   pBack = pHead;
   numItems = 0;
@@ -197,12 +197,16 @@ List<T>::List() {
 // list
 template<typename T>
 List<T>::~List() {
-  Node<T>* node = pHead;
+
+  Node<T>* node = pHead->next;
   while (node != nullptr) {
     Node<T>* temp = node;
     node = node->next;
     delete temp;
   }
+
+  delete pHead;
+
   pHead = nullptr;
   pBack = nullptr;
   numItems = 0;
@@ -242,36 +246,35 @@ void List<T>::insertBack(T item) {
 // remove front
 template<typename T>
 void List<T>::removeFront() {
+    if (empty()) return;
 
-  if (empty()) return;
+    Node<T>* node = pHead->next;
+    pHead->next = node->next;
 
-  Node<T>* node = pHead->next;
-  
-  pHead->next = node->next;
+    if (node->next != nullptr) {
+        node->next->prev = pHead;
+    } else {
+        pBack = pHead;
+    }
 
-  node->next->prev = pHead;
-
-  delete node;
-
-  numItems--;
+    delete node;
+    numItems--;
 }
+
 
 // remove back
 template<typename T>
 void List<T>::removeBack() {
+    if (empty()) return;
 
-  if (empty()) return;
+    Node<T>* node = pBack;
+    pBack = pBack->prev;
+    pBack->next = nullptr;
 
-  Node<T>* node = pBack;
-
-  pred(pBack);
-
-  pBack->next = nullptr;
-
-  delete node;
-
-  numItems--;
+    delete node;
+    numItems--;
 }
+
 
 // get item front
 
@@ -512,16 +515,37 @@ bool validaEnfileirar(const string& linha) {
     size_t primeiro_caracter = linha.find_first_not_of(" ");
     string linha_sem_espacos = (primeiro_caracter == string::npos) ? "" : linha.substr(primeiro_caracter);
     
-    return linha_sem_espacos.find("ENFILEIRA") != string::npos;
+    return linha_sem_espacos.rfind("ENFILEIRA", 0) == 0;
 }
 
 bool validaDesenfileirar(const string& linha) {
     size_t primeiro_caracter = linha.find_first_not_of(" ");
     string linha_sem_espacos = (primeiro_caracter == string::npos) ? "" : linha.substr(primeiro_caracter);
     
-    return linha_sem_espacos.find("DESENFILEIRA") != string::npos;
+    return linha_sem_espacos.rfind("DESENFILEIRA", 0) == 0;
 
 }
+
+void retirarEspacos(List<string>& memoria, List<string>& memoria2) {
+    string linha;
+    ListNavigator<string> nav = memoria.getListNavigator();
+
+    while (!nav.end()) {
+        nav.getCurrentItem(linha);
+
+        
+        size_t start = linha.find_first_not_of(' ');
+        if (start != string::npos) {
+            linha = linha.substr(start);
+        } else {
+            linha = "";
+        }
+
+        memoria2.insertBack(linha);
+        nav.next();
+    }
+}
+
 
 #define QUEUE_SIZE 100
 
@@ -578,6 +602,7 @@ public:
 
 
 void interpretarPrograma(Stack<string>& comandos, List<string>& memoria, Stack<int>& enderecos, string main = "Z :") {
+    
     ListNavigator<string> nav = memoria.getListNavigator();
     Queue<string> fila;
     
@@ -600,12 +625,14 @@ void interpretarPrograma(Stack<string>& comandos, List<string>& memoria, Stack<i
         nav.getCurrentItem(comando);
         
         if (validaEnfileirar(comando)){
-            string valor = comando.substr(10); 
+            string valor = comando.substr(10);
             fila.enqueue(valor);
+            comandos.push(comando);
             nav.next();
         } else if (validaDesenfileirar(comando)){
             if (!fila.empty()) {
-                fila.dequeue(); 
+                fila.dequeue();
+                comandos.push(comando);
             }
             nav.next();
         }else {
@@ -630,6 +657,7 @@ void interpretarPrograma(Stack<string>& comandos, List<string>& memoria, Stack<i
                 while (!nav2.end()) {
                     string novoComando;
                     nav2.getCurrentItem(novoComando);
+
                     
                     if (validaNomeFuncao(novoComando) && novoComando[0] == comando[0]) {
                         nav = nav2;
@@ -648,8 +676,73 @@ void interpretarPrograma(Stack<string>& comandos, List<string>& memoria, Stack<i
     while (!fila.empty()) {
         cout << fila.front() << " ";
         fila.dequeue();
+        
     }
 }
+
+void reverterStack(Stack<string>& comandos, Stack<string>& impressao) {
+    while (!comandos.empty()) {
+        string print = comandos.head();
+        impressao.push(print);
+        cout << "comandos head: " << comandos.head();
+        cout << "impressao ultimo: " << impressao.head() << endl;
+        comandos.pop();
+    }
+}
+
+void lidandoComFila(Stack<string>& comandos, Queue<string>& fila) {
+    
+    while (!comandos.empty()) {
+        
+        if (validaEnfileirar(comandos.head())) {
+            cout << "validou enfileirar" << endl;
+            fila.enqueue(comandos.head().substr(10));
+            comandos.pop();
+        }
+        
+        else if (validaDesenfileirar(comandos.head())) {
+            cout << "validou desenfileirar" << endl;
+            fila.dequeue();
+            comandos.pop();
+        }
+    }
+}
+
+void printLista(List<string>& traducao) {
+    
+    ListNavigator<string> nav = traducao.getListNavigator();
+    string comando;
+    while(!nav.end()){
+        nav.getCurrentItem(comando);
+        cout << comando << endl;
+        nav.next();
+    }
+    
+}
+
+void printStack(Stack<string>& stack) {
+    cout << "Topo da pilha ↓" << endl;
+
+    while (!stack.empty()) {
+        cout << "| " << stack.head() << " |" << endl;
+        stack.pop();
+    }
+
+    cout << "Base da pilha ↑" << endl;
+}
+
+void printQueue(Queue<string>& fila) {
+    cout << "Frente da fila → ";
+
+    while (!fila.empty()) {
+        cout << "[ " << fila.front() << " ] ";
+        fila.dequeue();
+    }
+
+    cout << "← Fim da fila" << endl;
+}
+
+
 
 
 int main(int argc, const char * argv[]) {
@@ -657,9 +750,14 @@ int main(int argc, const char * argv[]) {
     HashTable<Letter> dictionary;
     Stack<int> enderecos;
     Stack<string> comandos;
+    Stack<string> impressao;
+    
+    Queue<string> fila;
     
     List<string> memoria;
     List<string> traducao;
+    List<string> traducaoSemEspacos;
+    List<string> preparandoParaFila;
 
     alphabet(dictionary);
 
@@ -667,6 +765,8 @@ int main(int argc, const char * argv[]) {
     
     traduzirPrograma(memoria, dictionary, traducao);
     
-    interpretarPrograma(comandos, traducao, enderecos);
+    retirarEspacos(traducao, traducaoSemEspacos);
+    
+    interpretarPrograma(comandos, traducaoSemEspacos, enderecos);
     
 }
