@@ -126,7 +126,7 @@ public:
 
     bool end() const { return current == nullptr; }
 
-    void next() { 
+    void next() {
     if (!end()) {
         current = current->next;
         index = getIndex() + 1;
@@ -371,7 +371,7 @@ bool HashTable<T>::empty() {
 }
 
 template <typename T>
-unsigned long int HashTable<T>::hash(const std::string& key, unsigned long int m) {
+unsigned long int HashTable<T>::hash(const std::string& key,unsigned long int m) {
     unsigned long int hashValue = 0;
     unsigned long int n = key.length();
     for (size_t i = 0; i < n; ++i) {
@@ -403,7 +403,7 @@ string getSubstring(const std::string line, HashTable<T> &alfabeto){
     int div = line.length()/3;
     string substring, linhaTraduzida;
     Letter letra;
-    int index = 0;
+    size_t index = 0;
     
     for (int i = 0; i < div; i++){
         substring = line.substr(index, 3);
@@ -585,7 +585,7 @@ public:
 
     T front() const {
         if (empty()) {
-            return T(); 
+            return T();
         }
 
         return items[frontIndex];
@@ -674,74 +674,11 @@ void interpretarPrograma(Stack<string>& comandos, List<string>& memoria, Stack<i
     }
     
     while (!fila.empty()) {
-        cout << fila.front() << " ";
+        cout << fila.front()[0] << "";
         fila.dequeue();
         
     }
 }
-
-void reverterStack(Stack<string>& comandos, Stack<string>& impressao) {
-    while (!comandos.empty()) {
-        string print = comandos.head();
-        impressao.push(print);
-        cout << "comandos head: " << comandos.head();
-        cout << "impressao ultimo: " << impressao.head() << endl;
-        comandos.pop();
-    }
-}
-
-void lidandoComFila(Stack<string>& comandos, Queue<string>& fila) {
-    
-    while (!comandos.empty()) {
-        
-        if (validaEnfileirar(comandos.head())) {
-            cout << "validou enfileirar" << endl;
-            fila.enqueue(comandos.head().substr(10));
-            comandos.pop();
-        }
-        
-        else if (validaDesenfileirar(comandos.head())) {
-            cout << "validou desenfileirar" << endl;
-            fila.dequeue();
-            comandos.pop();
-        }
-    }
-}
-
-void printLista(List<string>& traducao) {
-    
-    ListNavigator<string> nav = traducao.getListNavigator();
-    string comando;
-    while(!nav.end()){
-        nav.getCurrentItem(comando);
-        cout << comando << endl;
-        nav.next();
-    }
-    
-}
-
-void printStack(Stack<string>& stack) {
-    cout << "Topo da pilha ↓" << endl;
-
-    while (!stack.empty()) {
-        cout << "| " << stack.head() << " |" << endl;
-        stack.pop();
-    }
-
-    cout << "Base da pilha ↑" << endl;
-}
-
-void printQueue(Queue<string>& fila) {
-    cout << "Frente da fila → ";
-
-    while (!fila.empty()) {
-        cout << "[ " << fila.front() << " ] ";
-        fila.dequeue();
-    }
-
-    cout << "← Fim da fila" << endl;
-}
-
 
 
 
@@ -750,7 +687,6 @@ int main(int argc, const char * argv[]) {
     HashTable<Letter> dictionary;
     Stack<int> enderecos;
     Stack<string> comandos;
-    Stack<string> impressao;
     
     Queue<string> fila;
     
