@@ -6,9 +6,7 @@
 //
 
 #include <iostream>
-#include <stdio.h>
-
-#include <cmath>
+#include <stdlib.h>
 using namespace std;
 
 class Letter {
@@ -32,10 +30,10 @@ public:
 
 template<typename T>
 class Node {
-  private:
+private:
   T item;
 
-  public:
+public:
   Node<T>* next;
   Node<T>* prev;
   Node(): next(nullptr), prev(nullptr) {}
@@ -152,14 +150,14 @@ public:
 // list
 template<typename T>
 class List {
-  private:
+private:
     Node<T>* pHead;
     Node<T>* pBack;
     int numItems;
     void succ(Node<T>*&);
     void pred(Node<T>*&);
 
-  public:
+public:
     List();
     ~List();
     void insertFront(T);
@@ -321,10 +319,10 @@ ListNavigator<T> List<T>::getListNavigator() const {
 #define TABLE_SIZE 1000
 template <typename T>
 struct HashTable {
-    private:
+private:
     List<T> t[TABLE_SIZE];
     
-    public:
+public:
     void insert(const std::string& key, T item);
     bool search(const std::string& key, T& item);
     int length();
@@ -371,7 +369,7 @@ bool HashTable<T>::empty() {
 }
 
 template <typename T>
-unsigned long int HashTable<T>::hash(const std::string& key,unsigned long int m) {
+unsigned long int HashTable<T>::hash(const std::string& key, unsigned long int m) {
     unsigned long int hashValue = 0;
     unsigned long int n = key.length();
     for (size_t i = 0; i < n; ++i) {
@@ -704,5 +702,4 @@ int main(int argc, const char * argv[]) {
     retirarEspacos(traducao, traducaoSemEspacos);
     
     interpretarPrograma(comandos, traducaoSemEspacos, enderecos);
-    
 }
